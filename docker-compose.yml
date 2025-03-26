@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+    postgres:
+        image: postgres:latest
+        container_name: postgres_gym
+        restart: always
+        environment:
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: gymdb
+        ports:
+            - '5432:5432'
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    backend:
+        build: ./backend
+        container_name: gym_backend
+        restart: always
+        ports:
+            - '4000:4000'
+        depends_on:
+            - postgres
+        environment:
+            - DATABASE_URL=postgres://admin:password@postgres:5432/gymdb
+        volumes:
+            - ./backend:/app
+
+    frontend:
+        build: ./frontend
+        container_name: gym_frontend
+        restart: always
+        ports:
+            - '3000:3000'
+        depends_on:
+            - backend
+        volumes:
+            - ./frontend:/app
+
+volumes:
+    pgdata:
